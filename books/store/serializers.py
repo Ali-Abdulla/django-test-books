@@ -20,7 +20,6 @@ class BookSerializer(ModelSerializer):
                                        read_only=True)
     readers = BookReaderSerializer(many=True, read_only=True)
 
-
     class Meta:
         model = Book
         fields = ('id', 'name', 'price', 'author_name', 'annotated_likes',

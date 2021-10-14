@@ -25,8 +25,9 @@ class BookSerializerTestCase(TestCase):
                                         rate=5)
         UserBookRelation.objects.create(user=user2, book=book_1, like=True,
                                         rate=5)
-        UserBookRelation.objects.create(user=user3, book=book_1, like=True,
-                                        rate=4)
+        user_book_3 = UserBookRelation.objects.create(user=user3, book=book_1, like=True)
+        user_book_3.rate = 4
+        user_book_3.save()
 
         UserBookRelation.objects.create(user=user1, book=book_2, like=True,
                                         rate=3)
@@ -36,7 +37,6 @@ class BookSerializerTestCase(TestCase):
 
         books = Book.objects.all().annotate(
             annotated_likes=Count(Case(When(userbookrelation__like=True, then=1))),
-            rating=Avg('userbookrelation__rate'),
             discount_difference=Case(When(discount='0', then=F('price')),
                                      default=F('price') - F('discount'))
         ).order_by('id')

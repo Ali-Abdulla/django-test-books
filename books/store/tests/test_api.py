@@ -12,6 +12,8 @@ from rest_framework.test import APITestCase
 from store.models import Book, UserBookRelation
 from store.serializers import BookSerializer
 
+from decimal import Decimal
+
 
 class BooksApiTestCase(APITestCase):
     def setUp(self):
@@ -34,7 +36,6 @@ class BooksApiTestCase(APITestCase):
             self.assertEqual(2, len(queries))
         books = Book.objects.all().annotate(
             annotated_likes=Count(Case(When(userbookrelation__like=True, then=1))),
-            rating=Avg('userbookrelation__rate'),
             discount_difference=Case(When(discount='0', then=F('price')),
                                      default=F('price') - F('discount'))
         ).order_by('id')
@@ -51,7 +52,6 @@ class BooksApiTestCase(APITestCase):
         response = self.client.get(url, format='OrderedDict')
         books = Book.objects.filter(id__in=[self.book_1.id]).annotate(
             annotated_likes=Count(Case(When(userbookrelation__like=True, then=1))),
-            rating=Avg('userbookrelation__rate'),
             discount_difference=Case(When(discount='0', then=F('price')),
                                      default=F('price') - F('discount'))
         )
@@ -63,7 +63,6 @@ class BooksApiTestCase(APITestCase):
         url = reverse('book-list')
         books = Book.objects.filter(id__in=[self.book_2.id, self.book_3.id]).annotate(
             annotated_likes=Count(Case(When(userbookrelation__like=True, then=1))),
-            rating=Avg('userbookrelation__rate'),
             discount_difference=Case(When(discount='0', then=F('price')),
                                      default=F('price') - F('discount'))
         ).order_by('id')
@@ -76,7 +75,6 @@ class BooksApiTestCase(APITestCase):
         url = reverse('book-list')
         books = Book.objects.filter(id__in=[self.book_1.id, self.book_3.id]).annotate(
             annotated_likes=Count(Case(When(userbookrelation__like=True, then=1))),
-            rating=Avg('userbookrelation__rate'),
             discount_difference=Case(When(discount='0', then=F('price')),
                                      default=F('price') - F('discount'))
         ).order_by('id')
@@ -89,7 +87,6 @@ class BooksApiTestCase(APITestCase):
         url = reverse('book-list')
         books = Book.objects.filter(id__in=[self.book_2.id, self.book_3.id, self.book_1.id]).annotate(
             annotated_likes=Count(Case(When(userbookrelation__like=True, then=1))),
-            rating=Avg('userbookrelation__rate'),
             discount_difference=Case(When(discount='0', then=F('price')),
                                      default=F('price') - F('discount'))
         ).order_by('author_name')
@@ -103,9 +100,8 @@ class BooksApiTestCase(APITestCase):
         url = reverse('book-list')
         data = {
             "name": "Programming in Python 3",
-            "price": 100,
-            "author_name": "Mark Summerfield",
-            "owner_name": "test_username"
+            "price": 150,
+            "author_name": "Mark Summerfield"
         }
         json_data = json.dumps(data)
         self.client.force_login(self.user)
